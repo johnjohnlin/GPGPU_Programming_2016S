@@ -69,10 +69,8 @@ public:
 	void Free()
 	{
 		assert((gpu_ == nullptr) == (cpu_ == nullptr));
-		if (cpu_ == nullptr) {
-			delete[] cpu_;
-			cudaFree(gpu_);
-		}
+		delete[] cpu_;
+		cudaFree(gpu_);
 		cpu_ = gpu_ = nullptr;
 	}
 
