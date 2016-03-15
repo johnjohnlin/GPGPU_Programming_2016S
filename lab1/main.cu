@@ -24,7 +24,7 @@ tuple<vector<char>, vector<int>, vector<int>> GenerateTestCase(Engine &eng, cons
 	bernoulli_distribution bd(0.1);
 	uniform_int_distribution<int> id1(1, 20);
 	uniform_int_distribution<int> id2(1, 5);
-	uniform_int_distribution<char> id3('a', 'z');
+	uniform_int_distribution<int> id3('a', 'z');
 	tuple<vector<char>, vector<int>, vector<int>> ret;
 	auto &text = get<0>(ret);
 	auto &pos = get<1>(ret);
