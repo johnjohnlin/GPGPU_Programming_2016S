@@ -2,7 +2,7 @@
 Please make sure your version is ahead of fcb448b.
 
 # Lab 1
-Please make sure your version is ahead of 3c412cb.
+Please make sure your version is ahead of bf64ada.
 
 # Lab 2
 Under constructing
