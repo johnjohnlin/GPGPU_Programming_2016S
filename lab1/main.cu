@@ -87,6 +87,7 @@ int main(int argc, char **argv)
 	// Part I
 	timer_count_position.Start();
 	int *pos_yours_gpu = pos_yours_sync.get_gpu_wo();
+	cudaMemset(pos_yours_gpu, 0, sizeof(int)*n);
 	CountPosition(text_sync.get_gpu_ro(), pos_yours_gpu, n);
 	CHECK;
 	timer_count_position.Pause();
@@ -103,6 +104,7 @@ int main(int argc, char **argv)
 
 	// Part II
 	int *head_yours_gpu = head_yours_sync.get_gpu_wo();
+	cudaMemset(head_yours_gpu, 0, sizeof(int)*n);
 	int n_head = ExtractHead(pos_yours_sync.get_gpu_ro(), head_yours_gpu, n);
 	CHECK;
 
