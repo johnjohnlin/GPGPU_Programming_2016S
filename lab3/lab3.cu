@@ -4,7 +4,7 @@
 __device__ __host__ int CeilDiv(int a, int b) { return (a-1)/b + 1; }
 __device__ __host__ int CeilAlign(int a, int b) { return CeilDiv(a, b) * b; }
 
-__global__ void WTFClone(
+__global__ void SimpleClone(
 	const float *background,
 	const float *target,
 	const float *mask,
@@ -37,7 +37,7 @@ void PoissonImageCloning(
 )
 {
 	cudaMemcpy(output, background, wb*hb*sizeof(float)*3, cudaMemcpyDeviceToDevice);
-	WTFClone<<<dim3(CeilDiv(wt,32), CeilDiv(ht,16)), dim3(32,16)>>>(
+	SimpleClone<<<dim3(CeilDiv(wt,32), CeilDiv(ht,16)), dim3(32,16)>>>(
 		background, target, mask, output,
 		wb, hb, wt, ht, oy, ox
 	);
