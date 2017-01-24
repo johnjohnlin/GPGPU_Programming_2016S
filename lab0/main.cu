@@ -10,45 +10,37 @@
 	}\
 }
 
-__global__ void SomeTransform(char *input_gpu, int fsize) {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if (idx < fsize and input_gpu[idx] != '\n') {
-		input_gpu[idx] = '!';
+const int W = 40;
+const int H = 12;
+
+__global__ void Draw(char *frame) {
+	// TODO: draw more complex things here
+	// Do not just submit the original file provided by the TA!
+	const int y = blockIdx.y * blockDim.y + threadIdx.y;
+	const int x = blockIdx.x * blockDim.x + threadIdx.x;
+	if (y < H and x < W) {
+		char c;
+		if (x == W-1) {
+			c = y == H-1 ? '\0' : '\n';
+		} else if (y == 0 or y == H-1 or x == 0 or x == W-2) {
+			c = ':';
+		} else {
+			c = ' ';
+		}
+		frame[y*W+x] = c;
 	}
 }
 
 int main(int argc, char **argv)
 {
-	// init, and check
-	if (argc != 2) {
-		printf("Usage %s <input text file>\n", argv[0]);
-		abort();
-	}
-	FILE *fp = fopen(argv[1], "r");
-	if (not fp) {
-		printf("Cannot open %s", argv[1]);
-		abort();
-	}
-	// get file size
-	fseek(fp, 0, SEEK_END);
-	size_t fsize = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	// read files
-	MemoryBuffer<char> text(fsize+1);
-	auto text_smem = text.CreateSync(fsize);
+	MemoryBuffer<char> frame(W*H);
+	auto frame_smem = frame.CreateSync(W*H);
 	CHECK;
-	fread(text_smem.get_cpu_wo(), 1, fsize, fp);
-	text_smem.get_cpu_wo()[fsize] = '\0';
-	fclose(fp);
 
-	// TODO: do your transform here
-	char *input_gpu = text_smem.get_gpu_rw();
-	// An example: transform the first 64 characters to '!'
-	// Don't transform over the tail
-	// And don't transform the line breaks
-	SomeTransform<<<2, 32>>>(input_gpu, fsize);
+	Draw<<<dim3((W-1)/16+1,(H-1)/12+1), dim3(16,12)>>>(frame_smem.get_gpu_wo());
+	CHECK;
 
-	puts(text_smem.get_cpu_ro());
+	puts(frame_smem.get_cpu_ro());
+	CHECK;
 	return 0;
 }
