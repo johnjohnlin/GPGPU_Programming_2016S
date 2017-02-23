@@ -1,6 +1,6 @@
 # 2017
 ## Lab 0
-Please make sure your version is ahead of 185e932.
+Please make sure your version is ahead of bf721d8.
 
 # 2016
 In principle we do not forbid you to peek the homework of 2016
