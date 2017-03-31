@@ -3,19 +3,21 @@
 #include <stdlib.h>
 #include <time.h>
 #include <algorithm>
+#define maxStack 512
 static const unsigned W = 960;
 static const unsigned H = 960;
 static const unsigned NFRAME = W;
 
-uint32_t V[W];
-uint8_t T[H*W*3/2];
-
 typedef struct {
-	uint32_t l, r, pivotPos, rPos, pivot;
+	int32_t l, r, pivotPos, rPos, pivot;
 } Stack;
 
-Stack stack[512];
+Stack stack[maxStack];
 int stackF = -1;
+uint32_t V[W];
+
+uint32_t *bufferV;
+Stack *bufferStack;
 
 struct Lab1VideoGenerator::Impl {
 	int t = 0;
@@ -50,11 +52,14 @@ void myPreprocessing(){
 		V[i] = i;
 	std::random_shuffle(V, V+W);
 	myStackPush(0, W-1, 0, W-1, V[0]);
+
+	cudaMalloc(&bufferV, W*sizeof(uint32_t));
+	cudaMalloc(&bufferStack, maxStack*sizeof(Stack));
 }
 
 void myQuickSort(){
 	if (stackF < 0) return;
-	unsigned int l, r, pivot, pivotPos, rPos;
+	int32_t l, r, pivot, pivotPos, rPos;
 	l = stack[stackF].l;
 	r = stack[stackF].r;
 	pivot = stack[stackF].pivot;
@@ -84,6 +89,35 @@ void myQuickSort(){
 	myStackPush(l, r, pivotPos, rPos, pivot);
 }
 
+__global__ void renderY(uint8_t *yuv, uint32_t *bufferV, int H, int stackF, Stack *bufferS){
+	int x = blockIdx.x, y = threadIdx.x;
+	int index = x * blockDim.x + y;
+	uint8_t tmp;
+	if (H-1-x > bufferV[y]) tmp = 0;
+	else tmp = 255;
+	for(int i=0; i<=stackF; i++)
+		if (y/2 == bufferS[i].pivotPos/2 && H-1-x <= bufferS[i].pivot) tmp = 76;
+	yuv[index] = tmp;
+}
+
+__global__ void renderU(uint8_t *yuv, uint32_t *bufferV, int H, int stackF, Stack *bufferS){
+	int x = blockIdx.x, y = threadIdx.x;
+	int index = x * blockDim.x + y;
+	uint8_t tmp = 128;
+	for(int i=0; i<=stackF; i++)
+		if (y == bufferS[i].pivotPos/2 && (H-1-x)*2 <= bufferS[i].pivot) tmp = 85;
+	yuv[index] = tmp;
+}
+
+__global__ void renderV(uint8_t *yuv, uint32_t *bufferV, int H, int stackF, Stack *bufferS){
+	int x = blockIdx.x, y = threadIdx.x;
+	int index = x * blockDim.x + y;
+	uint8_t tmp = 128;
+	for(int i=0; i<=stackF; i++)
+		if (y == bufferS[i].pivotPos/2 && (H-1-x)*2 <= bufferS[i].pivot) tmp = 255;
+	yuv[index] = tmp;
+}
+
 void Lab1VideoGenerator::Generate(uint8_t *yuv) {
 	if (impl->t == 0)
 		myPreprocessing();
@@ -91,33 +125,10 @@ void Lab1VideoGenerator::Generate(uint8_t *yuv) {
 		for(int i=0; i<13; i++)
 			myQuickSort();
 
-	// Render
-	for (int i=0; i<H; i++){
-		for (int j=0; j<W; j++){
-			if (H-1-i > V[j]) T[i*W+j] = 0;
-			else T[i*W+j] = 255;
-		}
-		for (int j=0; j<=stackF; j++)
-			if (H-1-i <= stack[j].pivot)
-				T[i*W + stack[j].pivotPos] = 76;
-	}
-
-	for (int i=0; i<H/2; i++){
-		for (int j=0; j<W/2; j++)
-			T[W*H + i*W/2 + j] = 128;
-		for (int j=0; j<=stackF; j++)
-			if (H-1-i*2 <= stack[j].pivot)
-				T[W*H + i*W/2 + stack[j].pivotPos/2] = 85;
-	}
-
-	for (int i=0; i<H/2; i++){
-		for (int j=0; j<W/2; j++)
-			T[W*H*5/4 + i*W/2 + j] = 128;
-		for (int j=0; j<=stackF; j++)
-			if (H-1-i*2 <= stack[j].pivot)
-				T[W*H*5/4 + i*W/2 + stack[j].pivotPos/2] = 255;
-	}
-
-	cudaMemcpy(yuv, T, W*H*3/2, cudaMemcpyHostToDevice);
+	cudaMemcpy(bufferV, V, W*sizeof(uint32_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(bufferStack, stack, (stackF+2)*sizeof(Stack), cudaMemcpyHostToDevice);
+	renderY<<<H, W>>>(yuv, bufferV, H, stackF, bufferStack);
+	renderU<<<H/2, W/2>>>(yuv+W*H, bufferV, H/2, stackF, bufferStack);
+	renderV<<<H/2, W/2>>>(yuv+W*H*5/4, bufferV, H/2, stackF, bufferStack);
 	(impl->t)++;
 }
