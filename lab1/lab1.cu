@@ -85,10 +85,11 @@ void myQuickSort(){
 }
 
 void Lab1VideoGenerator::Generate(uint8_t *yuv) {
-	if(impl->t == 0)
+	if (impl->t == 0)
 		myPreprocessing();
-	for(int i=0; i<15; i++)
-		myQuickSort();
+	else
+		for(int i=0; i<13; i++)
+			myQuickSort();
 
 	// Render
 	for (int i=0; i<H; i++){
@@ -98,15 +99,15 @@ void Lab1VideoGenerator::Generate(uint8_t *yuv) {
 		}
 		for (int j=0; j<=stackF; j++)
 			if (H-1-i <= stack[j].pivot)
-				T[i*W + stack[j].pivotPos] = 128;
+				T[i*W + stack[j].pivotPos] = 76;
 	}
 
 	for (int i=0; i<H/2; i++){
 		for (int j=0; j<W/2; j++)
 			T[W*H + i*W/2 + j] = 128;
-//		for (int j=0; j<=stackF; j++)
-//			if (H-1-i*2 <= stack[j].pivot)
-//				T[W*H + i*W/2 + stack[j].pivotPos/2] = 255;
+		for (int j=0; j<=stackF; j++)
+			if (H-1-i*2 <= stack[j].pivot)
+				T[W*H + i*W/2 + stack[j].pivotPos/2] = 85;
 	}
 
 	for (int i=0; i<H/2; i++){
