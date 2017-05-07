@@ -8,6 +8,9 @@ Please make sure your version is ahead of d7f67fc.
 ## Lab 2
 Please make sure your version is ahead of c45d96f.
 
+## Lab 3
+Please make sure your version is ahead of c6e7d02.
+
 # 2016
 In principle we do not forbid you to peek the homework of 2016
 , but keep in mind that we may renew the homework as the course progresses.
