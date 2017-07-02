@@ -1,0 +1,108 @@
+\documentclass[12pt,a4paper]{article}
+
+% \newcommand*{\TypeChinese}{} % Chinese support
+\newcommand*{\AdvancedDocument}{} % include code and math
+\newcommand*{\WithHeader}{}
+
+% basic packages
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx,subfigure,indentfirst,hyperref,colortbl,caption,cite,color,xcolor}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+
+\ifdefined\AdvancedDocument
+	% minted is better than listing.
+	\usepackage{minted}
+	% it requires minted of a newer version.
+	\setminted{linenos=true, frame=lines, framesep=2mm}
+	\usepackage{amsmath,amssymb,bm}
+\fi
+
+\ifdefined\TypeChinese
+	\usepackage{xeCJK,fontspec}
+	\XeTeXlinebreaklocale "zh"
+	\XeTeXlinebreakskip = 0pt plus 1pt
+	\setmainfont{KaiGen Gothic TW}
+	\setCJKmainfont{KaiGen Gothic TW}
+	\setmonofont{Droid Sans Mono}
+	\renewcommand{\baselinestretch}{1.3}
+\fi
+
+\ifdefined\WithHeader
+	\usepackage{fancyhdr}
+	\fancypagestyle{plain}{
+		\fancyhf{}
+		\chead{GPU Programming 2017 Spring \textbar ~CSIE Department, National Taiwan University}
+		\cfoot{\thepage}
+		\rfoot{GPGPU Assignment \#0}
+	}
+	\pagestyle{plain}
+	\renewcommand{\headrulewidth}{1pt}
+	\renewcommand{\footrulewidth}{2pt}
+\fi
+
+\newcommand{\figref}[1]{Figure \ref{Fig:#1}.}
+\newcommand{\tabref}[1]{Table \ref{Tab:#1}.}
+% \graphicspath{{fig/}}
+
+\begin{document}
+\title{GPGPU Assignment \#0}
+\author{TA: Yu Sheng Lin \and Instructor: Wei Chao Chen}
+\maketitle
+
+\section{Goals}
+
+You have to
+
+\begin{enumerate}
+\item Get your OS/IDE/editor configured and be ready to write CUDA code (How? Google is your friend).
+\item Become familiar with CUDA syntax (You should have learnt some of it during the first lecture).
+\end{enumerate}
+
+\section{Requirements}
+
+In this assignment you have to draw something in text by CUDA.
+We have provided a skeleton and some utilization functions (\verb+SyncedMem<T>+ and \verb+MemoryBuffer<T>+).
+
+We allocate a buffer of size $40\times 12$ but one linebreak is required for each line
+, so the actual drawing area is $39\times 12$ including the boundary, which is consists of colons.
+
+Here we show a possible output.
+\begin{listing}
+\begin{minted}{text}
+:::::::::::::::::::::::::::::::::::::::
+:                                     :
+:                                     :
+:                                     :
+:                                     :
+:                 ####          <|    :
+:               ######           |    :
+:             ########           |    :
+:           ##########           |    :
+:         ############           |    :
+:       ##############           #    :
+:::::::::::::::::::::::::::::::::::::::
+\end{minted}
+\caption{The famous scene in Nintendo Super Mario.}
+\end{listing}
+
+\section{Submission}
+\begin{itemize}
+\item The submission deadline is the midnight on 3/1 Wed. (namely before 3/2).
+\item You will be officially registered to this course only if you complete and submit a working solution in time.
+\item We will clone your code through Git using script; you may continue to revise your code before the deadline, but we will use the last revision before the deadline.
+\item Use a non-public Git repository such as Bitbucket, and make sure that your code can be cloned by these accounts: \url{https://bitbucket.org/johnjohnlys/} or \url{https://github.com/johnjohnlin}.
+\item Please fill your information and git repo in \href{https://goo.gl/forms/1R7p6QRMlrnKuImu1}{this form}. TA will test your Git URL one day before the deadline, so you can modify your URL in time if it doesn't work.
+\item You should complete this homework by yourself. Do not plagiarize, and do not facilitate plagiarism.  Make sure your Git repository is not accessible by your classmates.
+\end{itemize}
+
+Please keep the directory structure of the repo we have provided. For this assignment, we will only judge \verb+lab0/main.cu+.
+
+\section{Hints}
+
+\begin{itemize}
+\item \verb+"SyncedMemory.h"+ is under the directory \verb+utils/+.
+\item C++11 is required throughout all of the assignment. AFAIK, Visual Studio 2013 and g++ 4.8 or later is recommended.
+\item Do not spend much time on optimization or fancy functionalities. This assignment is just for qualification and will not be used for grading.
+\end{itemize}
+
+\end{document}

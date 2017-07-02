@@ -28,3 +28,19 @@ We also provide a testcase which is included in lab3/lab3\_test.zip.
 
 # Git
 If you are not familiar with Git, [this](http://backlogtool.com/git-guide/tw/intro/intro1_1.html) is the tutorial.
+
+# General submission guidelines
+
+## Repo URL change is forbidden (40% penalty)
+"git push --force" is useful since TA only clones your code after the deadline.
+
+## Always run cuda-memcheck (50% penalty)
+cuda-memcheck is handy and useful, you should always check your program with it.
+
+## Be sure to put the file at correct path (40% penalty)
+If we ask you to submit /lab1/hello.cu, do not submit /Lab1/hello.cu, /hello.cu or /homework/lab1/hello.cu.
+
+## Others
+* Git conflict (20% penalty)
+* Add large binary files (20% penalty)
+* Miss the deadline (10% penalty/day)
