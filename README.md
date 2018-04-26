@@ -3,7 +3,7 @@
 Please make sure your version is ahead of bf721d8.
 
 ## Lab 1
-Please make sure your version is ahead of d7f67fc.
+Please make sure your version is ahead of b44998b.
 
 ## Lab 2
 Please make sure your version is ahead of 7d72796.
