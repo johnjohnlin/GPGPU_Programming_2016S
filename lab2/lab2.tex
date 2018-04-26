@@ -8,6 +8,10 @@
 \usepackage[margin=2cm,headheight=15pt]{geometry}
 \usepackage{graphicx,subfigure,indentfirst,hyperref,colortbl,caption,cite,color,xcolor}
 \hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+% for handling underscores
+\usepackage{lmodern,relsize}
+\usepackage[T1]{fontenc}
+\renewcommand{\_}{\textscale{.5}{\textunderscore}}
 
 \ifdefined\AdvancedDocument
 	% minted is better than listing.
@@ -31,9 +35,9 @@
 	\usepackage{fancyhdr}
 	\fancypagestyle{plain}{
 		\fancyhf{}
-		\chead{GPU Programming 2016 Spring \textbar ~CSIE Department, National Taiwan University}
+		\chead{GPU Programming 2018 Spring \textbar ~Dep. of CSIE, NTU}
 		\cfoot{\thepage}
-		\rfoot{GPGPU Assignment \#2}
+		\rfoot{Programming Assignment \#2}
 	}
 	\pagestyle{plain}
 	\renewcommand{\headrulewidth}{1pt}
@@ -46,100 +50,109 @@
 % \graphicspath{{fig/}}
 
 \begin{document}
-\title{GPGPU Assignment \#2}
+\title{Programming Assignment \#2}
 \author{Author: Yu Sheng Lin \and Instructor: Wei Chao Chen}
 \maketitle
 
 \section{Goals}
 
-Make a video with CUDA in this assignment.  Be creative -- this is an open-ended assignment.
+You have to
+
+\begin{enumerate}
+\item Learn how to use the Thrust library.
+\item Learn how to implement some parallel algorithms on GPU.
+\end{enumerate}
+
+in this assignment.
 
 \section{Requirements}
 
-The requirements are very loose.  You just need to render a series of frames with CUDA, with as little input data as possible.
-For example, you can try to render Perlin Noise, Simplex Noise, or Stable Fluid.
-Be more artistic and try to render fireworks, ocean or even a short movie.
-Google ``Demoscene'' and see some extreme examples about what people can do with very small executables.
+This is a two-part fixed assignment.
+You are asked to implement the same functionality in both part.
+However, in part I you are only allowed to use existing libraries
+while in part II the efficiency of your code is also considered during grading.
 
-\subsection{Video Format}
+In this assignment you are required to count the position
+of each character inside the word it belongs to.
+\lstref{count} provides a sample input and output.
 
-In this lab we will first call \verb+void get_info(Lab2VideoInfo &info)+
-to get the height $H$, width $W$, FPS
-$N/D$ \footnote{We use a ratio to represent the FPS because we are using the y4m format. If you want 24 FPS, you shell returns $N = 24, D = 1$.}
-and number of frames $N_f$ of your video.
-Then we will call your \verb+void Generate(uint8_t *yuv)+ $N_f$ times to get all the frames for your video.
-
-Instead of storing RGB values directly,
-please use the YUV color space, which is the commonly used color space for video codecs.
-
-\begin{equation}
-\left\lbrace
-\begin{aligned}
-Y &= +0.299R+0.587G+0.114B\\
-U &= -0.169R-0.331G+0.500B+128\\
-V &= +0.500R-0.419G-0.081B+128
-\end{aligned}
-\right.
-\end{equation}
-
-We also subsample U and V channels both horizontally and vertically,
-that is, 
-$\dfrac{W}{2}*\dfrac{H}{2}$\footnote{$W$ and $H$ must both be even.}.
-The YUV channels are stored sequentially so the total size of a frame is $1.5WH$.
-
-\subsection{Sample code}
-The sample code (\lstref{sample}) generates a grayscale video
-which is black initially and gradually becomes lighter.
-"Grayscale" means $R=G=B$, so the YUV is:
-
-\begin{equation}
-\left\lbrace
-\begin{aligned}
-Y &= +0.299R+0.587R+0.114R = R\\
-U &= -0.169R-0.331R+0.500R+128 = 128\\
-V &= +0.500R-0.419R-0.081R+128 = 128
-\end{aligned}
-\right.
-\end{equation}
-
-The Y channel is $W*H$,
-so we first calculate the brightness according to the frame index
-then fill it into the device pointer.
-
-The U and V channels are $\dfrac{W}{2}*\dfrac{H}{2}$ each,
-so we fill 128 to the following memory space.
-Finally, we increase the frame index by one.
-
-\begin{listing}
-\begin{minted}{c}
-void Lab2VideoGenerator::Generate(uint8_t *yuv) {
-   cudaMemset(yuv, (impl->t)*255/NFRAME, W*H);
-   cudaMemset(yuv+W*H, 128, W*H/2);
-   ++(impl->t);
-}
+\begin{listing}[ht]
+\begin{minted}{text}
+gpu qq  a hello   sonoda (input)
+123012001012345000123456 (output)
 \end{minted}
-\caption{Sample code explanation}\label{Lst:sample}
+\caption{Example: Count the Position in Words.}\label{Lst:count}
 \end{listing}
 
-The output file is of the y4m raw video format (it can be very large!)
-and you can use software such as
-FFmpeg or Avconv to convert it to other compressed formats (\lstref{avconv}).
-\begin{listing}
-\begin{minted}{c}
-avconv -i output.y4m output.mkv
+You may easily come up with an $O(n)$ sequential algorithm
+and an $O(nk)$ parallel algorithm,
+where $n$ is the length of the input and $k$ is the maximum length of a word.
+
+The input is generated in a pseudo-random manner,
+while we will use a different random seed during grading.
+You can assume that $k=500,~n\approx 4\times10^7$ and
+the input only contains characters \verb+[a-z]+
+and we use linebreak \verb+'\n'+ as the spaces.
+
+You have to implement a function whose signature is \lstref{count_cpp}.
+All pointers are device pointers and \verb+text_size+ is the $n$.
+It should also be noticed that \verb+gridDim.x+ cannot exceed $2^{17}=131072$
+if you don't use \verb|-arch sm_30| (or higher)
+\footnote{We assume that you have a GPU newer than Kepler architecture.} compile flag.
+
+\begin{listing}[ht]
+\begin{minted}{cpp}
+void CountPosition1(const char *text, int *pos, int text_size);
+void CountPosition2(const char *text, int *pos, int text_size);
 \end{minted}
-\caption{Sample code explanation}\label{Lst:avconv}
+\caption{The function signature of part I.}\label{Lst:count_cpp}
 \end{listing}
 
-Hints: We do not allow you to modify the header,
-and if you don't know how to achieve that,
-please read \href{https://stackoverflow.com/questions/8972588/is-the-pimpl-idiom-really-used-in-practice}{Pimpl Idiom} or \href{https://en.wikipedia.org/wiki/Opaque_pointer}{Opaque Pointer}.
+\subsection{Part I: Using the Thrust Library (40pts)}\label{thrust}
+
+Thrust is a useful API including many common parallel computing patterns,
+and in this part you should only include
+\begin{itemize}
+\item Declaration of native and \verb+thrust::*+ types,
+\item A few \verb+struct+s with call operator and
+\item \verb+thrust::*+ and native CUDA functions like \verb+cudaFree+
+      (namely \verb+__global__+ functions are not allowed)
+\end{itemize}
+in \verb+CountPosition1+.
+
+Here are some hints:
+\begin{itemize}
+\item You will need the document \url{https://thrust.github.io/doc/modules.html}
+\item I have already included some necessary headers.
+\item If you write more than 10 lines, then you are probably wrong.
+\end{itemize}
+
+\subsection{Part II: Implement Your Own Kernel (40pts+15pts bonus)}
+
+In part II, you have to implement the same functionality from scratch,
+and {\color{red}{no external API and library is allowed}}.
+We provide some hints about the $O(n\ln k)$ algorithm in a separate PDF
+while it's not the only solution,
+and you can decide whether to read them by yourself.
+
+According to our experience, when $k=500$, $O(n\ln k)$ and $O(nk)$
+might have comparable speed. To achieve the best efficiency and
+outperform your classmate, we also challenge you to implement both and
+compare them if possible.
+According to the execution time of your program,
+at most 15pts bonus will be given.
 
 \section{Submission}
+
 \begin{itemize}
-\item The submission deadline is 2016/4/11 midnight (Mon.).
-\item Please send us a Youtube link (we will provide a spreadsheet for the purpose of submission).  As there can be delays with Youtube posts, we won't be super strict about the deadline, but please do make sure to complete the spreadsheet on time.
-\item We won't run your code but you still have to submit it. We may look into your code if it becomes necessary.
-\item Your grade for this assignment is determined by both "techniques" and "aesthetics". You may also promote your work on Facebook and we will consider giving you bonus points based on your post popularity.
+\item The submission deadline is 2017/5/10 23:59 (Fri.).
+\item The efficiency of part I will NOT be considered during grading, but if you
+break the rules listed in part \ref{thrust}, you will get 0pt.
+\item The efficiency part II will also be considered during grading, and pure CPU implementations would be disqualified.
+\item You can only modify \verb+lab2/counting.cu+, and we will only copy this file from your repo.
+\item The compile flags are \verb|--std=c++11 -O2 -arch sm_50|, and the environment is ArchLinux with CUDA 9.1. Although we will test your code on a Linux machine with one GTX 970, you should not use platform dependent libraries.
+\item Do not hack the answer by inspecting the memory or modifying the stack. This is a course about GPGPU programming, not assembly programming.
+\item Please also refer to assignment \#0 for more details.
 \end{itemize}
+
 \end{document}

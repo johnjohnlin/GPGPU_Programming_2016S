@@ -90,12 +90,13 @@ void TestRoutine(
 		printf("Part %d AC\n", part);
 	}
 }
-
+#define KB <<10
+#define MB <<20
 int main(int argc, char **argv)
 {
 	// Initialize random text
 	default_random_engine engine(12345);
-	auto text_pos_head = GenerateTestCase(engine, 40000000); // 40 MB data
+	auto text_pos_head = GenerateTestCase(engine, 40 MB);
 	vector<char> &text = get<0>(text_pos_head);
 	vector<int> &pos = get<1>(text_pos_head);
 
