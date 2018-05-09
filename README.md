@@ -9,7 +9,7 @@ Please make sure your version is ahead of b44998b.
 Please make sure your version is ahead of 7d72796.
 
 ## Lab 3
-Please make sure your version is ahead of c6e7d02.
+Please make sure your version is ahead of 678fdca.
 
 # 2016
 In principle we do not forbid you to peek the homework of 2016
