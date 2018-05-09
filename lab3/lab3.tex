@@ -31,7 +31,7 @@
 	\usepackage{fancyhdr}
 	\fancypagestyle{plain}{
 		\fancyhf{}
-		\chead{GPU Programming 2017 Spring \textbar ~CSIE Department, National Taiwan University}
+		\chead{GPU Programming 2018 Spring \textbar ~CSIE Department, National Taiwan University}
 		\cfoot{\thepage}
 		\rfoot{GPGPU Assignment \#3}
 	}
@@ -207,7 +207,7 @@ You may, for example, compare convergence against the number of iterations or ex
 We describe a few possible speed-up mechanisms, and our conjectures about how much you may gain from implementing these suggestions.
 
 First, you may observe that
-the time for a value to propagate from the left to the right of the image 
+the time for a value to propagate from the left to the right of the image
 is proportional to the width of the image.
 Therefore it may require the square of image sizes to actually converge to a proper solution.
 A naive implementation would require thousands of iterations to converge,
@@ -255,7 +255,7 @@ C_{b,SOR}'' = \omega C_b' + (1-\omega) C_{b,SOR}.
 The new formula extrapolates against the $C_b$ two steps before,
 instead of one, and this can still be implemented without an third buffer.
 We have confirmed that $\omega = 1.9$ works fine.
- 
+
 \section{Grading}
 \begin{enumerate}
 \item 100 points, when you finish the baseline implementation (Jacobi, no acceleration).
@@ -267,7 +267,7 @@ We have confirmed that $\omega = 1.9$ works fine.
 
 \section{Submission}
 \begin{itemize}
-\item The submission deadline is 2017/05/21 23:59.
+	\item The submission deadline is 2018/05/31 23:59 (Fri.).
 \item Please submit the result in loseless PNG format \verb+lab3/results/***.png+.
 \item Submit your source code \verb+lab3/lab3.cu+. Again, you should only modify this file in the homework.
 \item We will test your code with the command listed in \lstref{exe}.
@@ -275,7 +275,7 @@ We have confirmed that $\omega = 1.9$ works fine.
 \end{itemize}
 
 \section{Hint}
-\lstref{hint} contains part of TA's code. Feel free to use it.
+\lstref{hint} contains part of TA's baseline code. Feel free to use it.
 
 \pagebreak
 
